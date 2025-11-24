@@ -1,0 +1,6 @@
+.venv/
+myGym/
+mygym-env/
+__pycache__/
+.idea/
+*.pyc
