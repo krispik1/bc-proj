@@ -73,7 +73,7 @@ necessarily whether the episode contains collision or not
 - [ ] Offer more customization for the generator through config,
 - [ ] Allow more randomization in both colliding and avoiding trajectories generated with RRT algorithms,
 - [ ] Approximate workspace of the robot - where a goal object can be placed and in which orientation gripper grabs it,
-- [ ] Add other options for occlusions,
+- [ ] Add other options for occlusions and robots,
 - [ ] Separate the planning, generating and data processing into individual classes (instead of only DatasetGenerator),
 - [ ] Finish data processing part by adding a permanent storage of produced episode observations,
 - [ ] Smooth out RRT curves,
