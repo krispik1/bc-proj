@@ -5,7 +5,7 @@
     "render"    :"opengl",
     "seed"      :1,
     "camera"    :0,
-    "gui"       :0,
+    "gui"       :1,
     "visualize" :0,
     "visgym"    :0,
 
@@ -14,9 +14,9 @@
     "robot_init"    :[0.0, 0.4, 0.6],
     "max_velocity"  :10,
     "max_force"     :200,
-    "action_repeat" :1,
+    "action_repeat" :3,
 
-    "task_type"             :"reach",
+    "task_type"             :"AG",
     "natural_language"      :0,
     "task_objects"          : [
       {
@@ -27,7 +27,7 @@
           "obj_name":"cube_holes",
           "fixed":1,
           "rand_rot":0,
-          "sampling_area":[-0.5, 0.2, 0.3, 0.6, 0.1, 0.4]
+          "sampling_area":[-0.8, 0.6, 0.3, 1.1, 0.1, 0.8]
         }
       }
     ],
@@ -40,23 +40,19 @@
       "goal_state": "obj_6D",
       "additional_obs": [
         "joints_angles",
-        "distractor"
+        "distractor",
+        "endeff_xyz"
       ]
     },
 
     "distractors"           : {
-      "list":["cube_small"],
+      "list":["sphere"],
       "moveable":0,
       "constant_speed":0,
       "movement_dims":3,
-      "movement_endpoints":[-0.3, 0.3, 0.4, 0.7, 0.1, 0.3]
+      "movement_endpoints":[-0.8, 0.6, 0.3, 1.1, 0.2, 0.8]
     },
 
-    "reward"        :"distance",
-    "distance_type" :"euclidean",
-    "vae_path"      :null,
-    "yolact_path"   :null,
-    "yolact_config" :null,
 
     "train_framework"   :"tensorflow",
     "algo"              :"ppo2",
