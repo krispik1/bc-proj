@@ -1,6 +1,6 @@
 # Dataset generator for Bachelor's thesis
 
-A tool using MyGym environment to generated structured data for training FM/IM neural 
+A tool using MyGym (Vavrecka et al., [2021](https://doi.org/10.1109/ICTAI52525.2021.00046)) environment to generate structured data for training FM/IM neural 
 network architecture.
 
 ## Overview
