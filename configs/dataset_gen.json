@@ -67,5 +67,8 @@
     "eval_episodes" :30,
 
     "logdir"    :"trained_models/reach",
-    "record"    :0
+    "record"    :0,
+
+    "magnet_probability"                      : 0.5,
+    "max_tries_for_reset_until_goal_reachable": 50
 }

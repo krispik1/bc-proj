@@ -1,0 +1,7 @@
+{
+  "n_writers"   : 3,
+  "schemas"     : ["env", "transition", "episode"],
+  "path"        : "dataset",
+  "buffer_size" : 1024,
+  "chunks"      : 4096
+}
