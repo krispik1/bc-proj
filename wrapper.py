@@ -1,38 +1,26 @@
 import numpy as np
 from typing import Dict, Any, List
 
+from dataset_types import State, Action
 from mygym.myGym.envs.gym_env import GymEnv
 
-
 def get_action_vector(
-        s_t: Dict[str, Any],
-        s_t1: Dict[str, Any]
-) -> Dict[str, Any]:
+        s_t: State,
+        s_t1: State
+) -> Action:
     """
     Returns an action vector given as the difference between joint angles and status of the robot's magnet of
     state s_t and s_t1.
 
     :param s_t: Previous state vector.
     :param s_t1: Current state vector.
-    :return: Dictionary containing information about the action vector.
+    :return: Action vector.
     """
 
-    # Get joint angles and magnet status of previous state
-    s_t_q = np.array(s_t["joint_angles"])
-    s_t_mgt = s_t["mgt"]
-
-    # Get joint angles and magnet status of current state
-    s_t1_q = np.array(s_t1["joint_angles"])
-    s_t1_mgt = s_t1["mgt"]
-
-    # Action vector is given as difference between joint angles and magnet status
-    delta_q = (s_t1_q - s_t_q).tolist()
-    delta_mgt = s_t1_mgt - s_t_mgt
-
-    return {
-        "delta": delta_q,
-        "mgt": delta_mgt,
-    }
+    return Action(
+        delta_q=s_t1.joints_angles - s_t.joints_angles,
+        delta_mgt=s_t1.magnet_state - s_t.magnet_state
+    )
 
 
 class GymWrapper(GymEnv):
@@ -198,6 +186,8 @@ class GymWrapper(GymEnv):
         q = np.clip(q, self.robot.joints_limits[0], self.robot.joints_limits[1])
         for jid, idx in enumerate(self.robot.motor_indices):
             self.p.resetJointState(self.robot.robot_uid, idx, float(q[jid]))
+
+        self.p.performCollisionDetection()
 
     def random_toggle_mgt(
             self
@@ -446,7 +436,7 @@ class GymWrapper(GymEnv):
 
     def get_state_vector(
             self
-    ) -> Dict[str, Any]:
+    ) -> State:
         """
         Based on the observation of the environment, returns a state vector containing:
             - joint angles of the robot
@@ -455,15 +445,15 @@ class GymWrapper(GymEnv):
             - occlusions (distractors) present in the environment and their description given as position and rotation
             - state of the magnet (bool)
 
-        :return: Dictionary containing information about the state vector.
+        :return: State vector.
         """
         state = self.get_observation()
 
-        return {
-            "joint_angles": state["additional_obs"]["joints_angles"],
-            "ee6D": state["actual_state"],
-            "obj6D": state["goal_state"],
-            "occ": state["additional_obs"]["distractor"],
-            "mgt": self.robot.use_magnet,
-        }
+        return State(
+            joints_angles=np.asarray(state["additional_obs"]["joints_angles"], dtype=float),
+            end_effector6D=np.asarray(state["actual_state"], dtype=float),
+            goal_object6D=np.asarray(state["goal_state"], dtype=float),
+            occlusion6D=np.asarray(state["additional_obs"]["distractor"], dtype=float),
+            magnet_state=self.robot.use_magnet
+        )
 
