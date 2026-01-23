@@ -21,6 +21,11 @@ project/
 │    └── dataset_gen.json
 ├── helpers/ # helper methods for trajectory planning
 │    └── geometry_helper.json
+├── dataset_writer/ # classes for permanent data storage
+│    └── buffer.py # Buffer for storing data in batches
+│    └── dataset_schemas.py # Schemas for tables where data is stored
+│    └── h5_writer.py # Writer using HDF5 files to store data
+│    └── writer_manager.py # combines writer and buffer and ensures data storage follows schemas
 ├── screenshots/
 ├── math/ # deeper explanation of planning algorithms
 │   ├── rrt_planner.md
@@ -30,7 +35,10 @@ project/
 │   ├── rrt_policy.py
 │   └── waypoint_policy.py
 ├── screenshots/ # visual examples of data samples
-├── dataset_generator.txt # utilizes planners to generate data
+├── dataset_types.py # Types utilized for dataset representation
+├── planner.py # Planner with various policies for trajectory planning
+├── episode_generator.py # Generator of transitions of episodes that follows trajectories
+├── dataset_generator.txt # utilizes planners and episode generator to generate dataset
 ├── wrapper.py # Wrapper of MyGym env used for generation
 └── README.md
 ```
@@ -69,15 +77,23 @@ necessarily whether the episode contains collision or not
 ![Detour waypoint with RRT](screenshots/rrtwa.png)
 ![Impact point with RRT](screenshots/rrtwc.png)
 
+### Smoothed RRT trajectories by removal
+
+TODO
+
+### Smoothed RRT trajectories by Laplacian smoothing
+
+TODO
+
 ## (possible) TODO
 - [ ] Offer more customization for the generator through config,
-- [ ] Allow more randomization in both colliding and avoiding trajectories generated with RRT algorithms,
+- [x] Allow more randomization in both colliding and avoiding trajectories generated with RRT algorithms,
 - [ ] Approximate workspace of the robot - where a goal object can be placed and in which orientation gripper grabs it,
-- [ ] Add other options for occlusions and robots,
-- [ ] Separate the planning, generating and data processing into individual classes (instead of only DatasetGenerator),
-- [ ] Finish data processing part by adding a permanent storage of produced episode observations,
-- [ ] Smooth out RRT curves,
-- [ ] Make trajectory generation more stable,
+- [x] Add other options for occlusions,
+- [x] Separate the planning, generating and data processing into individual classes (instead of only DatasetGenerator),
+- [x] Finish data processing part by adding a permanent storage of produced episode observations,
+- [x] Smooth out RRT curves,
+- [x] Make trajectory generation through waypoints more stable,
 
 ## License
 For academic use
