@@ -177,3 +177,12 @@ EPISODE_SCHEMA = Schema(
         )
     ]
 )
+
+# Schema dictionaries
+SCHEMA_FROM_STR = {
+    "env": ENV_SCHEMA,
+    "transition": TRANSITION_SCHEMA,
+    "episode": EPISODE_SCHEMA,
+}
+
+SCHEMA_TO_STR = {v: k for k, v in SCHEMA_FROM_STR.items()}
