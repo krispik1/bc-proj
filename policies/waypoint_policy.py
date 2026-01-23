@@ -1,12 +1,10 @@
-import time
-
 import numpy as np
-from typing import List, Tuple, Literal
+from typing import List, Tuple
 
+from dataset_types import PlannerMode
 from wrapper import GymWrapper
-from helpers.geometry_helper import get_distractor_sphere, dist
+from helpers.geometry_helper import dist, get_distractor_centre, get_distractor_sphere_approximation_radius
 
-PlannerMode = Literal["direct", "avoid", "collide"]
 
 class WaypointTrajectoryGenerator:
 
@@ -28,8 +26,12 @@ class WaypointTrajectoryGenerator:
         self.start_pos = self.env.get_ef_position()
         self.goal_pos = self.env.get_goal_position()
 
-        # Approximate the distractor by a sphere
-        self.distractor_centre, self.distractor_radius = get_distractor_sphere(self.env)
+        # Approximate the distractor by a sphere using bounding boxes
+        aabb_min, aabb_max = self.env.p.getAABB(self.env.get_distractors()[0].get_uid())
+        aabb_min = np.array(aabb_min, dtype=float)
+        aabb_max = np.array(aabb_max, dtype=float)
+        self.distractor_centre = get_distractor_centre(aabb_min, aabb_max)
+        self.distractor_radius = get_distractor_sphere_approximation_radius(aabb_min, aabb_max)
 
     # In md
 
@@ -38,9 +40,6 @@ class WaypointTrajectoryGenerator:
             base_clearance: float = 0.05,
             scale_radius: Tuple[float, float] = (0.8, 1.5),
             t_sigma: float = 0.15,
-            safety_margin: float = 0.02,
-            max_tries: int = 100,
-            alpha: float = 1.8
     ) -> np.ndarray:
         # Calculate tangent
         direct_path = self.goal_pos - self.start_pos
@@ -78,28 +77,14 @@ class WaypointTrajectoryGenerator:
         clearance = self.distractor_radius + base_clearance
 
         # Sample direction and length of the push
-        for _ in range(max_tries):
-            theta = np.random.uniform(0, 2 * np.pi)
-            scale = np.random.uniform(scale_radius[0], scale_radius[1])
-            r = clearance * scale
+        theta = np.random.uniform(0, 2 * np.pi)
+        scale = np.random.uniform(scale_radius[0], scale_radius[1])
+        r = clearance * scale
 
-            dir_offset = np.cos(theta) * u + np.sin(theta) * w
-            waypoint = closest_point_to_occ + r * dir_offset
+        dir_offset = np.cos(theta) * u + np.sin(theta) * w
+        waypoint = closest_point_to_occ + r * dir_offset
 
-            # Check if waypoint is viable
-            dist_wd = dist(waypoint, self.distractor_centre)
-            dist_ws = dist(waypoint, self.start_pos)
-            dist_gw = dist(self.goal_pos, waypoint)
-            dist_detour = dist_gw + dist_ws
-            if dist_wd >= (self.distractor_radius + safety_margin) and dist_detour <= alpha * float(direct_path_norm):
-                return waypoint
-
-        # Fallback waypoint
-        fallback_dir = closest_point_to_occ - self.distractor_centre
-        if np.linalg.norm(fallback_dir) < 1e-9:
-            fallback_dir = u
-        fallback_dir /= (float(np.linalg.norm(fallback_dir)) + 1e-9)
-        return self.distractor_centre + fallback_dir * (self.distractor_radius + base_clearance + safety_margin)
+        return waypoint
 
     def _sample_collision_target_on_distractor(
             self,
@@ -132,7 +117,7 @@ class WaypointTrajectoryGenerator:
                 continue
 
             # Randomize the impact point and check if it is valid
-            r = np.random.uniform(0.0 * self.distractor_radius, 0.2 * self.distractor_radius)
+            r = np.random.uniform(0.1 * self.distractor_radius, 0.5 * self.distractor_radius)
             return [self.distractor_centre + r * v]
 
         return [self.distractor_centre]
@@ -190,10 +175,10 @@ class WaypointTrajectoryGenerator:
             self.env.p.stepSimulation()
             collision_flag = self.env.check_robot_distractor_collision()
 
-            if collision_flag and mode == "collide":
-                return True
+            if collision_flag:
+                return mode == PlannerMode.COLLIDE
 
-        return not mode == "collide"
+        return not mode == PlannerMode.COLLIDE
 
     def plan(
             self,
@@ -209,9 +194,9 @@ class WaypointTrajectoryGenerator:
         """
         for _ in range(max_tries):
             # Plan traj based on mode
-            if mode == "avoid":
+            if mode == PlannerMode.AVOID:
                 waypoints = self._plan_avoidance()
-            elif mode == "collide":
+            elif mode == PlannerMode.COLLIDE:
                 waypoints = self._plan_collide()
             else:
                 waypoints = self._plan_direct()
