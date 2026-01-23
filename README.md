@@ -86,7 +86,7 @@ TODO
 TODO
 
 ## (possible) TODO
-- [ ] Offer more customization for the generator through config,
+- [x] Offer more customization for the generator through config,
 - [x] Allow more randomization in both colliding and avoiding trajectories generated with RRT algorithms,
 - [ ] Approximate workspace of the robot - where a goal object can be placed and in which orientation gripper grabs it,
 - [x] Add other options for occlusions,
