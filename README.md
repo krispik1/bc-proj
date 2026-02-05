@@ -77,13 +77,12 @@ necessarily whether the episode contains collision or not
 ![Detour waypoint with RRT](screenshots/rrtwa.png)
 ![Impact point with RRT](screenshots/rrtwc.png)
 
-### Smoothed RRT trajectories by removal
+### RRT trajectories (green) by removal (red) and by Laplacian smoothing (blue)
 
-TODO
-
-### Smoothed RRT trajectories by Laplacian smoothing
-
-TODO
+![RRT avoidance smoothed by removal](screenshots/rrtar.png)
+![RRT collision smoothed by removal](screenshots/rrtcr.png)
+![RRT avoidance smoothed by Laplacian](screenshots/rrtal.png)
+![RRT collision smoothed by Laplacian](screenshots/rrtcl.png)
 
 ## (possible) TODO
 - [x] Offer more customization for the generator through config,

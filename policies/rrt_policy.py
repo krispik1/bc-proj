@@ -24,7 +24,7 @@ def _is_jagged_triangle(
     :return: True only if the triangle formed by given joints configuration is too sharp.
     """
     v1 = q_1 - q_0
-    v2 = q_2 - q_0
+    v2 = q_2 - q_1
     n1 = dist(q_0, q_1)
     n2 = dist(q_1, q_2)
 
@@ -274,21 +274,23 @@ class RRTTrajectoryGenerator:
         if len(trajectory) <= min_nodes:
             return trajectory
 
+        new_trajectory = trajectory.copy()
+
         for _ in range(max_passes):
-            if len(trajectory) <= min_nodes:
+            if len(new_trajectory) <= min_nodes:
                 break
 
             changed = False
             i = 0
 
             # Test the three consecutive configurations
-            while i <= len(trajectory) - 3 and len(trajectory) > min_nodes:
-                q0, q1, q2 = trajectory[i], trajectory[i + 1], trajectory[i + 2]
+            while i <= len(new_trajectory) - 3 and len(new_trajectory) > min_nodes:
+                q0, q1, q2 = new_trajectory[i], new_trajectory[i + 1], new_trajectory[i + 2]
 
                 # q1 must create sharp turns and new path q0->q2 must be valid for q1 to be removed
                 if _is_jagged_triangle(q0, q1, q2, angle_degree):
                     if self._shortcut_valid(q0, q2, mode, max_shortcut_length):
-                        trajectory.pop(i + 1)
+                        new_trajectory.pop(i + 1)
                         changed = True
 
                         i = max(i - 1, 0)
@@ -300,7 +302,7 @@ class RRTTrajectoryGenerator:
             if not changed:
                 break
 
-        return trajectory
+        return new_trajectory
 
     def _smooth_trajectory_through_elastic_band(
             self,
@@ -329,15 +331,16 @@ class RRTTrajectoryGenerator:
 
         # Get joints limits to not produce invalid configurations by pushes
         lows, highs = self.env.robot.joints_limits
+        new_trajectory = trajectory.copy()
 
         for _ in range(max_passes):
             changed = False
 
             # Smooth a segment of three consecutive configurations
-            for i in range(1, len(trajectory) - 1):
-                q_prev = trajectory[i - 1]
-                q = trajectory[i]
-                q_next = trajectory[i + 1]
+            for i in range(1, len(new_trajectory) - 1):
+                q_prev = new_trajectory[i - 1]
+                q = new_trajectory[i]
+                q_next = new_trajectory[i + 1]
 
                 # Choose target position based on neighbouring configurations
                 q_target = 0.5 * (q_prev + q_next)
@@ -367,14 +370,14 @@ class RRTTrajectoryGenerator:
                     continue
 
                 # Replace old configuration with the new one if it satisfies conditions
-                trajectory[i] = q_new
+                new_trajectory[i] = q_new
                 changed = True
 
             # If iteration produced no change, so will the next one - end loop
             if not changed:
                 break
 
-        return trajectory
+        return new_trajectory
 
     def plan(
             self,
