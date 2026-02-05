@@ -1,7 +1,7 @@
 from typing import List
 
 from dataset_types import PlannerPolicy, Episode
-from episode_generator import EpisodeGenerator
+from episode_runner import EpisodeRunner
 from planner import Planner
 from wrapper import GymWrapper
 
@@ -33,7 +33,7 @@ class DatasetGenerator:
 
         # Initialize planner and episode generator
         self.planner = Planner(env, target_collision_ratio, start_pos, goal_pos)
-        self.episode_gen = EpisodeGenerator(env, episode_horizon, start_pos, goal_pos)
+        self.episode_gen = EpisodeRunner(env, episode_horizon, start_pos, goal_pos)
 
         # List of planners and number of episodes for each
         self.planners = [PlannerPolicy.BABBLING, PlannerPolicy.WAYPOINT, PlannerPolicy.RRT, PlannerPolicy.RRT_WAYPOINT]

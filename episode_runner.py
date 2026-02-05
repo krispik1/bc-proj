@@ -7,7 +7,7 @@ from helpers.geometry_helper import dist
 from wrapper import get_action_vector, GymWrapper
 
 
-class EpisodeGenerator:
+class EpisodeRunner:
 
     def __init__(
             self,
@@ -163,13 +163,6 @@ class EpisodeGenerator:
             planner_mode=planner_mode,
             success=len(self.env.robot.magnetized_objects) > 0
         )
-
-        # Bookkeep for choosing modes
-        # if episode_collision:
-        #     self._n_collision += 1
-        # else:
-        #     self._n_non_collision += 1
-        # self._episode_index += 1
 
         # Reduce number of samples for consistent number of states and actions
         episode = self._downsample_episode(
